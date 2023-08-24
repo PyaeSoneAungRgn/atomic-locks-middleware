@@ -2,6 +2,12 @@
 
 All notable changes to `atomic-locks-middleware` will be documented in this file.
 
+## v1.0.3 - 2023-08-24
+
+- add $request->path() in lock prefix
+
+**Full Changelog**: https://github.com/PyaeSoneAungRgn/atomic-locks-middleware/compare/v1.0.2...v1.0.3
+
 ## v1.0.2 - 2023-08-24
 
 **Full Changelog**: https://github.com/PyaeSoneAungRgn/atomic-locks-middleware/compare/v1.0.1...v1.0.2
