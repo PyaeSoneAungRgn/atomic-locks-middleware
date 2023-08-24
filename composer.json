@@ -1,9 +1,10 @@
 {
     "name": "pyaesoneaung/atomic-locks-middleware",
-    "description": "A package to ensure that only one request is being executed on the server at a time",
+    "description": "A package designed to ensure that only one request is processed at a time.",
     "keywords": [
         "pyaesoneaung",
         "laravel",
+        "middleware",
         "atomic-locks-middleware"
     ],
     "homepage": "https://github.com/pyaesoneaung/atomic-locks-middleware",

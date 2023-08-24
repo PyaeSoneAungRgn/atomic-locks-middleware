@@ -1,6 +1,6 @@
 # Atomic Locks Middleware
 
-A package to ensure that only one request is being executed on the server at a time.
+A package designed to ensure that only one request is processed at a time.
 
 ## Installation
 
