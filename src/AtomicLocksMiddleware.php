@@ -22,6 +22,8 @@ class AtomicLocksMiddleware
             default => $option
         };
 
+        $name = "{$request->path()}_{$name}";
+
         $lock = Cache::lock(
             config('atomic-locks-middleware.lock_prefix').$name,
             config('atomic-locks-middleware.lock_seconds')
