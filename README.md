@@ -56,6 +56,24 @@ public function terminate(Request $request, Response $response)
 
 The Atomic Locks Middleware uses [Laravel Atomic Locks](https://laravel.com/docs/10.x/cache#atomic-locks) in the background. It initiates a lock at the beginning of the middleware's execution and releases the lock once the response is dispatched to the browser.
 
+## Publish Configuration
+
+Publish the configuration for customization
+
+```bash
+php artisan vendor:publish --provider="PyaeSoneAung\AtomicLocksMiddleware\AtomicLocksMiddlewareServiceProvider"
+```
+
+```php
+return [
+    'middleware' => 'atomic-locks-middleware',
+    'instance' => 'AtomicLocksMiddleware',
+    'lock_prefix' => 'atomic_locks_middleware_',
+    'lock_seconds' => 60,
+    'message' => 'Too Many Attempts',
+];
+```
+
 ## Testing
 
 ```php

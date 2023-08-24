@@ -16,6 +16,10 @@ class AtomicLocksMiddlewareServiceProvider extends PackageServiceProvider
 
     public function boot(): void
     {
+        $this->publishes([
+            __DIR__.'/../config/atomic-locks-middleware.php' => config_path('atomic-locks-middleware.php'),
+        ]);
+
         app('router')->aliasMiddleware(
             config('atomic-locks-middleware.middleware'),
             AtomicLocksMiddleware::class
