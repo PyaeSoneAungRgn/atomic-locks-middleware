@@ -41,9 +41,9 @@ Route::post('/order', function () {
 
 public function handle(Request $request, Closure $next)
 {
-	$lock = Cache::lock('foo', 60);
+    $lock = Cache::lock('foo', 60);
 	app()->instance('foo', $lock);
-	if ($lock->get()) {
+    if ($lock->get()) {
         return $next($request);
     }
 }
