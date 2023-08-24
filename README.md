@@ -1,84 +1,63 @@
-# A package to ensure that only one request is being executed on the server at a time
+# Atomic Locks Middleware
 
-[![Latest Version on Packagist](https://img.shields.io/packagist/v/pyaesoneaung/atomic-locks-middleware.svg?style=flat-square)](https://packagist.org/packages/pyaesoneaung/atomic-locks-middleware)
-[![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/pyaesoneaung/atomic-locks-middleware/run-tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/pyaesoneaung/atomic-locks-middleware/actions?query=workflow%3Arun-tests+branch%3Amain)
-[![GitHub Code Style Action Status](https://img.shields.io/github/actions/workflow/status/pyaesoneaung/atomic-locks-middleware/fix-php-code-style-issues.yml?branch=main&label=code%20style&style=flat-square)](https://github.com/pyaesoneaung/atomic-locks-middleware/actions?query=workflow%3A"Fix+PHP+code+style+issues"+branch%3Amain)
-[![Total Downloads](https://img.shields.io/packagist/dt/pyaesoneaung/atomic-locks-middleware.svg?style=flat-square)](https://packagist.org/packages/pyaesoneaung/atomic-locks-middleware)
-
-This is where your description should go. Limit it to a paragraph or two. Consider adding a small example.
-
-## Support us
-
-[<img src="https://github-ads.s3.eu-central-1.amazonaws.com/atomic-locks-middleware.jpg?t=1" width="419px" />](https://spatie.be/github-ad-click/atomic-locks-middleware)
-
-We invest a lot of resources into creating [best in class open source packages](https://spatie.be/open-source). You can support us by [buying one of our paid products](https://spatie.be/open-source/support-us).
-
-We highly appreciate you sending us a postcard from your hometown, mentioning which of our package(s) you are using. You'll find our address on [our contact page](https://spatie.be/about-us). We publish all received postcards on [our virtual postcard wall](https://spatie.be/open-source/postcards).
+A package to ensure that only one request is being executed on the server at a time.
 
 ## Installation
-
-You can install the package via composer:
 
 ```bash
 composer require pyaesoneaung/atomic-locks-middleware
 ```
 
-You can publish and run the migrations with:
-
-```bash
-php artisan vendor:publish --tag="atomic-locks-middleware-migrations"
-php artisan migrate
-```
-
-You can publish the config file with:
-
-```bash
-php artisan vendor:publish --tag="atomic-locks-middleware-config"
-```
-
-This is the contents of the published config file:
-
-```php
-return [
-];
-```
-
-Optionally, you can publish the views using
-
-```bash
-php artisan vendor:publish --tag="atomic-locks-middleware-views"
-```
-
 ## Usage
 
+By default, the atomic-locks-middleware uses `$request->user()?->id ?: $request->ip()` within atomic locks.
+
 ```php
-$atomicLocksMiddleware = new PyaeSoneAung\AtomicLocksMiddleware();
-echo $atomicLocksMiddleware->echoPhrase('Hello, PyaeSoneAung!');
+Route::post('/order', function () {
+    // ...
+})->middleware('atomic-locks-middleware');
 ```
+
+If you prefer to implement IP-based locking, you can use `atomic-locks-middleware:ip`.
+
+```php
+Route::post('/order', function () {
+    // ...
+})->middleware('atomic-locks-middleware:ip');
+```
+
+However, you have the flexibility to define `atomic-locks-middleware:{anything}` to customize the locking mechanism according to your preferences.
+
+```php
+Route::post('/order', function () {
+    // ...
+})->middleware('atomic-locks-middleware:{anything}');
+```
+
+## How Does It Work?
+
+```php
+// Logic within the middleware
+
+public function handle(Request $request, Closure $next)
+{
+	$lock = Cache::lock('foo', 60);
+	app()->instance('foo', $lock);
+	if ($lock->get()) {
+        return $next($request);
+    }
+}
+
+public function terminate(Request $request, Response $response)
+{
+    app('foo')->release();
+}
+```
+
+The Atomic Locks Middleware uses [Laravel Atomic Locks](https://laravel.com/docs/10.x/cache#atomic-locks) in the background. It initiates a lock at the beginning of the middleware's execution and releases the lock once the response is dispatched to the browser.
 
 ## Testing
 
-```bash
+```php
 composer test
 ```
-
-## Changelog
-
-Please see [CHANGELOG](CHANGELOG.md) for more information on what has changed recently.
-
-## Contributing
-
-Please see [CONTRIBUTING](CONTRIBUTING.md) for details.
-
-## Security Vulnerabilities
-
-Please review [our security policy](../../security/policy) on how to report security vulnerabilities.
-
-## Credits
-
-- [Pyae Sone Aung](https://github.com/PyaeSoneAungRgn)
-- [All Contributors](../../contributors)
-
-## License
-
-The MIT License (MIT). Please see [License File](LICENSE.md) for more information.

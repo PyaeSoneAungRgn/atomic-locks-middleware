@@ -13,4 +13,12 @@ class AtomicLocksMiddlewareServiceProvider extends PackageServiceProvider
             ->name('atomic-locks-middleware')
             ->hasConfigFile();
     }
+
+    public function boot(): void
+    {
+        app('router')->aliasMiddleware(
+            config('atomic-locks-middleware.middleware'),
+            AtomicLocksMiddleware::class
+        );
+    }
 }
