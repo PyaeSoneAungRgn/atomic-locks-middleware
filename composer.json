@@ -1,17 +1,17 @@
 {
-    "name": ":vendor_slug/:package_slug",
-    "description": ":package_description",
+    "name": "pyaesoneaung/atomic-locks-middleware",
+    "description": "A package to ensure that only one request is being executed on the server at a time",
     "keywords": [
-        ":vendor_name",
+        "pyaesoneaung",
         "laravel",
-        ":package_slug"
+        "atomic-locks-middleware"
     ],
-    "homepage": "https://github.com/:vendor_slug/:package_slug",
+    "homepage": "https://github.com/pyaesoneaung/atomic-locks-middleware",
     "license": "MIT",
     "authors": [
         {
-            "name": ":author_name",
-            "email": "author@domain.com",
+            "name": "Pyae Sone Aung",
+            "email": "pyaesoneaungrgn@gmail.com",
             "role": "Developer"
         }
     ],
@@ -30,24 +30,22 @@
         "pestphp/pest-plugin-laravel": "^2.0",
         "phpstan/extension-installer": "^1.1",
         "phpstan/phpstan-deprecation-rules": "^1.0",
-        "phpstan/phpstan-phpunit": "^1.0",
-        "spatie/laravel-ray": "^1.26"
+        "phpstan/phpstan-phpunit": "^1.0"
     },
     "autoload": {
         "psr-4": {
-            "VendorName\\Skeleton\\": "src/",
-            "VendorName\\Skeleton\\Database\\Factories\\": "database/factories/"
+            "PyaeSoneAung\\AtomicLocksMiddleware\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "VendorName\\Skeleton\\Tests\\": "tests/",
+            "PyaeSoneAung\\AtomicLocksMiddleware\\Tests\\": "tests/",
             "Workbench\\App\\": "workbench/app/"
         }
     },
     "scripts": {
         "post-autoload-dump": "@composer run prepare",
-        "clear": "@php vendor/bin/testbench package:purge-skeleton --ansi",
+        "clear": "@php vendor/bin/testbench package:purge-atomic-locks-middleware --ansi",
         "prepare": "@php vendor/bin/testbench package:discover --ansi",
         "build": [
             "@composer run prepare",
@@ -72,10 +70,10 @@
     "extra": {
         "laravel": {
             "providers": [
-                "VendorName\\Skeleton\\SkeletonServiceProvider"
+                "PyaeSoneAung\\AtomicLocksMiddleware\\AtomicLocksMiddlewareServiceProvider"
             ],
             "aliases": {
-                "Skeleton": "VendorName\\Skeleton\\Facades\\Skeleton"
+                "AtomicLocksMiddleware": "PyaeSoneAung\\AtomicLocksMiddleware\\Facades\\AtomicLocksMiddleware"
             }
         }
     },
