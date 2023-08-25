@@ -37,20 +37,37 @@ Route::post('/order', function () {
 ## How Does It Work?
 
 ```php
-// Logic within the middleware
-
-public function handle(Request $request, Closure $next)
+public function handle(Request $request, Closure $next, string $option = null): Response
 {
-    $lock = Cache::lock('foo', 60);
-    app()->instance('foo', $lock);
+    $name = match ($option) {
+        null => $request->user()?->id ?: $request->ip(),
+        'ip' => $request->ip(),
+        default => $option
+    };
+
+    $name = "{$request->path()}_{$name}";
+
+    $lock = Cache::lock(
+        config('atomic-locks-middleware.lock_prefix').$name,
+        config('atomic-locks-middleware.lock_seconds')
+    );
+    app()->instance(config('atomic-locks-middleware.instance'), $lock);
     if ($lock->get()) {
         return $next($request);
     }
+
+    return response()->json([
+        'message' => config('atomic-locks-middleware.message'),
+    ], 429);
 }
 
-public function terminate(Request $request, Response $response)
+public function terminate(Request $request, Response $response): void
 {
-    app('foo')->release();
+    $instanceName = config('atomic-locks-middleware.instance');
+
+    if (app()->bound($instanceName)) {
+        app($instanceName)->release();
+    }
 }
 ```
 
