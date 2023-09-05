@@ -37,6 +37,8 @@ Route::post('/order', function () {
 ## How Does It Work?
 
 ```php
+// AtomicLocksMiddleware.php
+
 public function handle(Request $request, Closure $next, string $option = null): Response
 {
     $name = match ($option) {
