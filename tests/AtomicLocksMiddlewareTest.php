@@ -12,6 +12,7 @@ it('can block the next request if the current one is still processing', function
 
     $duration = 5;
 
+    config()->set('atomic-locks-middleware.can_block', true);
     config()->set('atomic-locks-middleware.default_lock_duration', $duration);
     config()->set('atomic-locks-middleware.default_block_duration', $duration);
 
@@ -28,6 +29,7 @@ it('can block the next request if the current one is still processing', function
 it('can return an error message if the lock is not acquired in time', function (): void {
     $duration = 5;
 
+    config()->set('atomic-locks-middleware.can_block', true);
     config()->set('atomic-locks-middleware.default_lock_duration', $duration);
     config()->set('atomic-locks-middleware.default_block_duration', $duration - 3);
 
