@@ -2,6 +2,14 @@
 
 All notable changes to `atomic-locks-middleware` will be documented in this file.
 
+## v.1.3.0 - 2025-05-31
+
+### What's Changed
+
+* Support Laravel 12
+
+**Full Changelog**: https://github.com/PyaeSoneAungRgn/atomic-locks-middleware/compare/v1.2.0...v1.3.0
+
 ## v1.2.0 - 2024-03-12
 
 - Support Laravel 11
