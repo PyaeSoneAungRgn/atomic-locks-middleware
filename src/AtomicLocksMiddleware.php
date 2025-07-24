@@ -14,52 +14,54 @@ class AtomicLocksMiddleware
     /**
      * Handle an incoming request.
      *
-     * @param  Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+     * @param  Closure(Request): (Response)  $next
      */
-    public function handle(Request $request, Closure $next, string $option = null, string $lockDuration = null, string $canBlock = null, string $blockDuration = null): Response
+    public function handle(
+        Request $request,
+        Closure $next,
+        ?string $option = null,
+        ?string $lockDuration = null,
+        ?string $canBlock = null,
+        ?string $blockDuration = null
+    ): Response
     {
         if (! empty($canBlock)) {
             $canBlock = filter_var($canBlock, FILTER_VALIDATE_BOOLEAN);
         }
 
+        $ip = $request->ip();
+        $isAjax = $request->isJson() || $request->wantsJson();
+
         $name = match ($option) {
-            null => $request->user()?->id ?: $request->ip(),
-            'ip' => $request->ip(),
+            null => $request->user()?->id ?: $ip,
+            'ip' => $ip,
             default => $option
         };
 
-        $name = "{$request->path()}_{$name}";
+        $cacheName = "{$request->path()}_{$name}";
 
         $lock = Cache::lock(
-            config('atomic-locks-middleware.lock_prefix').$name,
-            $lockDuration ?: config('atomic-locks-middleware.default_lock_duration')
+            $this->getConfigKey('lock_prefix').$cacheName,
+            $lockDuration ?: $this->getConfigKey('default_lock_duration')
         );
 
         if (! $lock->get()) {
-            if (! ($canBlock ?? config('atomic-locks-middleware.can_block'))) {
-                return response()->json([
-                    'message' => config('atomic-locks-middleware.message'),
-                ], 429);
+            if (! ($canBlock ?? $this->getConfigKey('can_block'))) {
+                return $this->getResponse($this->getConfigKey('message'), 429, $isAjax);
             }
 
             try {
-                $lock->block($blockDuration ?: config('atomic-locks-middleware.default_block_duration'));
+                $lock->block($blockDuration ?: $this->getConfigKey('default_block_duration'));
             } catch (LockTimeoutException) {
-                $lock->release();
-
-                return response()->json([
-                    'message' => config('atomic-locks-middleware.block_timeout_error_message'),
-                ], 500);
+                return $this->getResponse($this->getConfigKey('block_timeout_error_message'), 500, $isAjax);
             } catch (Throwable $th) {
+                return $this->getResponse($th->getMessage(), 500, $isAjax);
+            } finally {
                 $lock->release();
-
-                return response()->json([
-                    'message' => $th->getMessage(),
-                ], 500);
             }
         }
 
-        app()->instance(config('atomic-locks-middleware.instance'), $lock);
+        app()->instance($this->getLockInstanceName(), $lock);
 
         return $next($request);
     }
@@ -69,10 +71,29 @@ class AtomicLocksMiddleware
      */
     public function terminate(Request $request, Response $response): void
     {
-        $instanceName = config('atomic-locks-middleware.instance');
+        $instanceName = $this->getLockInstanceName();
 
         if (app()->bound($instanceName)) {
             app($instanceName)->release();
         }
+    }
+
+    private function getLockInstanceName(): string
+    {
+        return $this->getConfigKey('instance');
+    }
+
+    private function getConfigKey(string $key): mixed
+    {
+        return config('atomic-locks-middleware.'.$key);
+    }
+
+    private function getResponse(string $msg, int $code, bool $isAjax): mixed
+    {
+        $data = ['message' => $msg];
+
+        return $isAjax
+            ? response()->json($data, $code)
+            : back($code)->with($data);
     }
 }
